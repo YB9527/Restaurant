@@ -1,0 +1,55 @@
+{
+	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+		/* {
+			"path": "pages/index/index"
+		}
+	    , */{
+            "path" : "pages/shopMall/index"
+        }
+        ,{
+            "path" : "pages/check/index"
+        }
+        ,{
+            "path" : "pages/my/index",
+            "style" :                                                                                    
+            {
+                "enablePullDownRefresh": false
+            }
+        }
+    ],
+	"tabBar" : {
+	    "color" : "#7A7E83",
+	    "selectedColor" : "#3cc51f",
+	    "borderStyle" : "black",
+	    "backgroundColor" : "#ffffff",
+	    "list" : [
+	        {
+	            "pagePath" : "pages/shopMall/index",
+	            "iconPath" : "static/images/icon_order.png",
+	            "selectedIconPath" : "static/images/icon_order.png",
+	            "text" : "点餐"
+	        },
+	        {
+	            "pagePath" : "pages/check/index",
+	            "iconPath" : "static/images/icon_money.png",
+	            "selectedIconPath" : "static/images/icon_money.png",
+	            "text" : "买单"
+	        },
+	        {
+	            "pagePath" : "pages/my/index",
+	            "iconPath" : "static/images/icon_my.png",
+	            "selectedIconPath" : "static/images/icon_my.png",
+	            "text" : "我的"
+	        }]
+	},
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "王氏羊肉",
+		"navigationBarBackgroundColor": "#F8F8F8",
+		"backgroundColor": "#F8F8F8",
+		"enablePullDownRefresh":false,
+		"app-plus":{
+			"bounce":"none"
+		}
+	}
+}

@@ -19,13 +19,14 @@
 					v-for="(food,index) in foodList"
 					:key="food.id"
 					class="food">
-						<image :src="food.img"></image>
+					
+						<image :src="food.url"></image>
 						<view class="content">
 							<view class="top">
 								<text class="label">{{food.label}}</text>
 							</view>
 							<view class="bottom">
-								<text class="price">￥{{food.price}}/{{food.unit}}</text>
+								<text class="price">￥{{food.price}}/{{food.unit | foodUnitFilter}}</text>
 								<view class="menu-add" v-show="haseCount(food,orderFoodList)" >
 									<img mode="scaleToFill" @click="setFoodCount(index,-1,food)" src="/static/images/subtract.png">
 								</view>
@@ -57,7 +58,7 @@
 						v-for="(orderFood,index) in orderFoodList"
 						:key="index"
 						class="food">
-							<image :src="orderFood.food.img"></image>
+							<image :src="orderFood.food.url" mode="aspectFit"></image>
 							<view class="content">
 								<view class="top">
 									<text class="label">{{orderFood.food.label}}</text>
@@ -90,30 +91,17 @@
 </template>
 
 <script>
+	import foodTypeApi from '../common/foodTypeApi.js'
+	import foodApi from '../common/foodApi.js'
 	export default {
 		data() {
 			return {
 				cartFoodListShow:false,
-				currentfoodtypeid:1,
+				currentfoodtypeid:"",
 				orderFoodCount:0,
 				orderFoodList:[],//点的{菜品food、数量count}
-				foodtypeList:[
-					{id:1,label:"主菜"},
-					{id:2,label:"配菜"},
-					{id:21,label:"酒水"},
-					{id:3,label:"小吃"},
-					{id:4,label:"小吃"},
-					{id:5,label:"小吃"},
-					{id:6,label:"小吃"},
-					{id:7,label:"小吃"},
-					{id:8,label:"小吃"},
-					{id:9,label:"小吃"},
-					{id:10,label:"小吃"},
-					{id:11,label:"小吃"},
-					{id:12,label:"小吃"},
-					{id:13,label:"小吃"},
-					{id:14,label:"小吃"},
-				],
+				foodtypeList:[],
+				
 				foodList:[],
 			}
 		},
@@ -140,9 +128,41 @@
 			}
 		},
 		created() {
-			this.findFoodByTypeId(this.currentfoodtypeid);
+			
+			this.init();
 		},
 		methods: {
+			init(){
+				this.findAllFoodType()
+					.then((foodtypeList)=>{
+						this.foodtypeList = foodtypeList;
+						if(foodtypeList.length > 0 &&!this.currentfoodtypeid ){
+							this.currentfoodtypeid = foodtypeList[0].id;
+						}
+						this.findFoodByTypeId(this.currentfoodtypeid);
+					});
+			
+			},
+			findAllFoodType(){
+				return foodTypeApi.findAll();
+			},
+			//根据食物类型获取所有食物
+			findFoodByTypeId(typeid){
+				foodApi.findFoodByTypeId(typeid)
+					.then(foods=>{
+						console.log(foods);
+						for (let food of foods) {
+							food.url = this.$Api.imgpriewurl+food.imageurl;
+							//console.log(food.url);
+						}
+						if(this.foodList && this.foodList.length > 0){
+							this.foodList.splice(0,this.foodList.length);
+						}
+						this.foodList.push(...foods);
+						
+				
+					});
+			},
 			//清空购物车
 			clearOrderCart(){
 				let orderFoodList = this.orderFoodList;
@@ -174,7 +194,7 @@
 				this.findFoodByTypeId(foodtpe.id);
 			},
 			//根据食物类型获取所有食物
-			findFoodByTypeId(typeid){
+			/* findFoodByTypeId2(typeid){
 				if(typeid === 1){
 					this.foodList  = [
 						{id:2,label:"羊肉汤",unit:"斤",describe:"",price:100,img:"https://qcloud.dpfile.com/pc/9CTG3egYVhA4qDEGPZysOWm-CMHWxdqKtHOfGwwz2KJ3SQvBEuZcM3cJ5XDTpMvP5g_3Oo7Z9EXqcoVvW9arsw.jpg"},
@@ -189,7 +209,8 @@
 				}else{
 					this.foodList = [];
 				}
-			},
+			}, */
+			
 			//点菜
 			setFoodCount(index,foodcount,food){
 				let orderFoodList = this.orderFoodList;
@@ -260,6 +281,7 @@
 						justify-content: space-between;
 						flex-direction: column;
 						.top{
+							
 							text{
 								font-size: 32rpx;
 								font-weight: 600;
@@ -390,6 +412,7 @@
 					justify-content: space-between;
 					flex-direction: column;
 					.top{
+						margin-top: 10rpx;
 						text{
 							font-size: 32rpx;
 							font-weight: 600;

@@ -7,6 +7,9 @@
             "path" : "pages/shopMall/index"
         }
         ,{
+            "path" : "pages/checkOut/checkOut"
+        },
+		{
             "path" : "pages/check/index"
         }
         ,{
@@ -16,6 +19,7 @@
                 "enablePullDownRefresh": false
             }
         }
+        
     ],
 	"tabBar" : {
 	    "color" : "#7A7E83",
@@ -30,7 +34,7 @@
 	            "text" : "点餐"
 	        },
 	        {
-	            "pagePath" : "pages/check/index",
+	            "pagePath" : "pages/checkOut/checkOut",
 	            "iconPath" : "static/images/icon_money.png",
 	            "selectedIconPath" : "static/images/icon_money.png",
 	            "text" : "买单"

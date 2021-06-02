@@ -7,7 +7,7 @@ Vue.config.productionTip = false
 import Tool from '@/common/Tool.js'
 Vue.prototype.$Tool = Tool;
 
-import Api from '@/pages/common/api.js'
+import Api from '@/api/api.js'
 Vue.prototype.$Api = Api;
 
 

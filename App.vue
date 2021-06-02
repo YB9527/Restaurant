@@ -18,4 +18,13 @@
 		height: 100%;
 		background-color: #F1F1F1;
 	}
+	
+	.box {
+		padding: 10px;
+		width: calc(94%);
+		border-radius: 15upx;
+		margin: 20px auto;
+		box-shadow: 0upx 5upx 20upx rgba(0, 0, 0, 0.1);
+	
+	}
 </style>

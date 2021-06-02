@@ -85,23 +85,24 @@
 			</view>
 			<view class="cart-count"  @click="openCartInfo" ><text v-show="orderFoodCount !== 0"> {{orderFoodCount}}份</text> </view>
 			<view class="cart-price">￥<span>{{orderFoodList | computedAmount}}</span></view>
-			<view class="cart-btn red">去结算</view>
+			<view class="cart-btn red" @click="ok">确定</view>
 		</view>
 	</view>
 </template>
 
 <script>
-	import foodTypeApi from '../common/foodTypeApi.js'
-	import foodApi from '../common/foodApi.js'
+	import foodTypeApi from '@/api/foodTypeApi.js'
+	import foodApi from '@/api//foodApi.js'
+	import canZhuoApi from '@/api//canZhuoApi.js'
 	export default {
 		data() {
 			return {
+				canzhuonum:-1,
 				cartFoodListShow:false,
 				currentfoodtypeid:"",
 				orderFoodCount:0,
 				orderFoodList:[],//点的{菜品food、数量count}
 				foodtypeList:[],
-				
 				foodList:[],
 			}
 		},
@@ -127,10 +128,24 @@
 				return "";
 			}
 		},
-		created() {
+		onLoad(option) {
+			let canzhuonum = option.canzhuonum;
+			if(canzhuonum){
+				this.canzhuonum = canzhuonum;
+				uni.setNavigationBarTitle({
+				    title: '王氏羊肉（'+canzhuonum+"号桌）"
+				});
+			}else{
+				uni.setNavigationBarTitle({
+				    title: '王氏羊肉（ 外卖 ）'
+				});
+			}
 			
+		},
+		created() {
 			this.init();
 		},
+		
 		methods: {
 			init(){
 				this.findAllFoodType()
@@ -159,8 +174,6 @@
 							this.foodList.splice(0,this.foodList.length);
 						}
 						this.foodList.push(...foods);
-						
-				
 					});
 			},
 			//清空购物车
@@ -210,7 +223,30 @@
 					this.foodList = [];
 				}
 			}, */
-			
+			ok(){
+				if(this.orderFoodList.length === 0){
+					uni.showToast({
+					    title: '你还没有点菜',
+						icon:"none",
+					    duration: 1000
+					});
+					return;
+				}
+				//保存点好的菜到数据库中
+				let canzhuonum = this.canzhuonum;
+				let canzhuo ={
+					id:this.$Tool.uuid(),
+					canzhuonum : canzhuonum,
+					canzhuo_foodArray:[],
+				}
+				for (let orderfood of this.orderFoodList) {
+					let canzhuo_food = {id:this.$Tool.uuid(),canzhuonum,foodid:orderfood.food.id,count:orderfood.count}
+					canzhuo.canzhuo_foodArray.push(canzhuo_food)
+				}
+				canZhuoApi.addCanZhuo(canzhuo);
+				console.log(this.orderFoodList);
+				console.log(canzhuo);
+			},
 			//点菜
 			setFoodCount(index,foodcount,food){
 				let orderFoodList = this.orderFoodList;

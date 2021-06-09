@@ -8,9 +8,6 @@
         }
         ,{
             "path" : "pages/checkOut/checkOut"
-        },
-		{
-            "path" : "pages/check/index"
         }
         ,{
             "path" : "pages/my/index",

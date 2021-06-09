@@ -10,7 +10,8 @@ Vue.prototype.$Tool = Tool;
 import Api from '@/api/api.js'
 Vue.prototype.$Api = Api;
 
-
+import sysApi from '@/api/sysApi.js'
+Vue.prototype.$SysApi = sysApi;
 			
 Vue.filter('foodUnitFilter',unit=>{
 	let str = unit;
@@ -40,7 +41,10 @@ Vue.filter('foodStateFilter',state=>{
 	}
 	return str;
 });
-
+Vue.filter('dateTimeFilter',date=>{
+	
+	return Tool.dateTime2Str(date);
+});
 
 App.mpType = 'app'
 

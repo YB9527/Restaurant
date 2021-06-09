@@ -1,6 +1,6 @@
 <template>
 	<view>
-	我的
+		<view>历史订单</view>
 	</view>
 </template>
 

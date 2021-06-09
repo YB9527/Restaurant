@@ -20,7 +20,7 @@
 					:key="food.id"
 					class="food">
 					
-						<image :src="food.url"></image>
+						<image :src="food.url" mode="aspectFill"></image>
 						<view class="content">
 							<view class="top">
 								<text class="label">{{food.label}}</text>
@@ -58,13 +58,14 @@
 						v-for="(orderFood,index) in orderFoodList"
 						:key="index"
 						class="food">
-							<image :src="orderFood.food.url" mode="aspectFit"></image>
+							<image :src="orderFood.food.url" mode="aspectFill"></image>
 							<view class="content">
 								<view class="top">
 									<text class="label">{{orderFood.food.label}}</text>
 								</view>
 								<view class="bottom">
-									<text class="price">￥{{orderFood.food.price}}/{{orderFood.food.unit}}</text>
+									<text class="price">￥{{orderFood.food.price * orderFood.count}}</text>
+									
 									<view class="menu-add"  >
 										<img mode="scaleToFill" @click="setFoodCount(index,-1,orderFood.food)" src="/static/images/subtract.png">
 									</view>
@@ -93,10 +94,12 @@
 <script>
 	import foodTypeApi from '@/api/foodTypeApi.js'
 	import foodApi from '@/api//foodApi.js'
-	import canZhuoApi from '@/api//canZhuoApi.js'
+	import canZhuoApi from '@/api/canZhuoApi.js'
 	export default {
 		data() {
 			return {
+				userid:'17380646105',
+				peopletotal:5,
 				canzhuonum:-1,
 				cartFoodListShow:false,
 				currentfoodtypeid:"",
@@ -130,6 +133,7 @@
 		},
 		onLoad(option) {
 			let canzhuonum = option.canzhuonum;
+			canzhuonum=8;
 			if(canzhuonum){
 				this.canzhuonum = canzhuonum;
 				uni.setNavigationBarTitle({
@@ -165,7 +169,7 @@
 			findFoodByTypeId(typeid){
 				foodApi.findFoodByTypeId(typeid)
 					.then(foods=>{
-						console.log(foods);
+						//console.log(foods);
 						for (let food of foods) {
 							food.url = this.$Api.imgpriewurl+food.imageurl;
 							//console.log(food.url);
@@ -223,7 +227,7 @@
 					this.foodList = [];
 				}
 			}, */
-			ok(){
+			async ok(){
 				if(this.orderFoodList.length === 0){
 					uni.showToast({
 					    title: '你还没有点菜',
@@ -234,18 +238,34 @@
 				}
 				//保存点好的菜到数据库中
 				let canzhuonum = this.canzhuonum;
+				let date = await this.$SysApi.getSystemDateTime();
+				let canzhuoid = this.$Tool.uuid();
 				let canzhuo ={
-					id:this.$Tool.uuid(),
+					id:canzhuoid,
 					canzhuonum : canzhuonum,
+					date,
 					canzhuo_foodArray:[],
+					userid:this.userid,
+					peopletotal:this.peopletotal,
 				}
 				for (let orderfood of this.orderFoodList) {
-					let canzhuo_food = {id:this.$Tool.uuid(),canzhuonum,foodid:orderfood.food.id,count:orderfood.count}
+					let canzhuo_food = {id:this.$Tool.uuid(),canzhuoid,foodid:orderfood.food.id,count:orderfood.count,isfinish:0}
+					
 					canzhuo.canzhuo_foodArray.push(canzhuo_food)
 				}
-				canZhuoApi.addCanZhuo(canzhuo);
+				let total =await canZhuoApi.addCanZhuo(canzhuo);
 				console.log(this.orderFoodList);
 				console.log(canzhuo);
+				if(total > 0){
+					uni.showToast({
+						title: '点菜成功',
+						duration: 1000
+					});
+					this.orderFoodList.splice(0,this.orderFoodList.length);
+					this.orderFoodCount = 0;
+					this.cartFoodListShow = false;
+				}
+				
 			},
 			//点菜
 			setFoodCount(index,foodcount,food){
@@ -299,7 +319,7 @@
 				min-height: 300rpx;
 				
 				/deep/ .uni-scroll-view{
-					max-height: 600rpx;
+					max-height: 80%;
 				}
 				.food{
 					padding: 20rpx;
@@ -312,9 +332,9 @@
 						margin-right: 10rpx;
 					}
 					.content{
-						width: 300rpx;
+						width: 400rpx;
 						display: flex;
-						justify-content: space-between;
+						
 						flex-direction: column;
 						.top{
 							
@@ -324,12 +344,14 @@
 							}
 						}
 						.bottom {
+							display:flex;
+							justify-content: space-between;
+							margin-top: 20rpx;
 							.price{
 								font-weight: 600;
 								color: #DE2A34;
+								margin-right: 150rpx;
 							}
-							display:flex;
-							justify-content: space-between;
 							img {
 								width: 45rpx;
 								height: 45rpx;
@@ -445,7 +467,7 @@
 				.content{
 					width: 300rpx;
 					display: flex;
-					justify-content: space-between;
+					
 					flex-direction: column;
 					.top{
 						margin-top: 10rpx;
@@ -455,6 +477,7 @@
 						}
 					}
 					.bottom {
+						margin-top: 20rpx;
 						.price{
 							font-weight: 600;
 							color: #DE2A34;

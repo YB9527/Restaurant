@@ -13,7 +13,11 @@
 					<view class="food" v-for="(canzhuo_food_linke) in canzhuo.canzhuo_food_linke" :key="canzhuo_food_linke.id">
 						<view class="left">
 							<image :src="canzhuo_food_linke.food.imageurl" mode="aspectFill"></image>
-							<view class="lefttext"><text class="foodtname">{{canzhuo_food_linke.food.label}}</text><text> x {{canzhuo_food_linke.count}}</text></view>
+							<view class="lefttext">
+								<text class="foodtname">{{canzhuo_food_linke.food.label}}</text>
+								<text> x {{canzhuo_food_linke.count}}</text>
+								<text class="date">  {{canzhuo_food_linke.date}}</text>
+							</view>
 						</view>
 						<view class="right">
 							<text class="price">￥ {{canzhuo_food_linke.food.price * canzhuo_food_linke.count}}</text>
@@ -108,6 +112,7 @@
 							canzhuo.ischeckout = 1;
 							canzhuo.checkdate= date;
 						}
+						this.orderFoodList = [];
 						canZhuoApi.saveCanZhuo(orderFoodList);
 						uni.showToast({
 							title:"支付成功",
@@ -120,6 +125,11 @@
 </script>
 
 <style lang="scss">
+	.date{
+		margin-top: 20rpx;
+		color: #999999;
+		font-size: $uni-font-size-sm;
+	}
 	.checkOut{
 		height: 100%;
 		width: 100%;

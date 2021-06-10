@@ -238,22 +238,44 @@
 				}
 				//保存点好的菜到数据库中
 				let canzhuonum = this.canzhuonum;
+				//根据餐桌号餐桌此桌是否正在用餐
+				let canzhuo = await canZhuoApi.findCanChuoingBynum(canzhuonum);
 				let date = await this.$SysApi.getSystemDateTime();
-				let canzhuoid = this.$Tool.uuid();
-				let canzhuo ={
-					id:canzhuoid,
-					canzhuonum : canzhuonum,
-					date,
-					canzhuo_foodArray:[],
-					userid:this.userid,
-					peopletotal:this.peopletotal,
+				let userid = this.userid;
+				let indatabase = false;
+				
+				if(canzhuo){
+					 indatabase = true;
+					 canzhuo.canzhuo_foodArray =[];
+				}else{
+					canzhuo ={
+						id:this.$Tool.uuid(),
+						canzhuonum : canzhuonum,
+						date,
+						canzhuo_foodArray:[],
+						userid,
+						peopletotal:this.peopletotal,
+					};
 				}
+				let canzhuoid = canzhuo.id;
 				for (let orderfood of this.orderFoodList) {
-					let canzhuo_food = {id:this.$Tool.uuid(),canzhuoid,foodid:orderfood.food.id,count:orderfood.count,isfinish:0}
-					
+					let canzhuo_food = {
+						id:this.$Tool.uuid(),
+						canzhuoid,
+						foodid:orderfood.food.id,
+						count:orderfood.count,
+						isfinish:0,
+						userid,
+						date,
+					}
 					canzhuo.canzhuo_foodArray.push(canzhuo_food)
 				}
-				let total =await canZhuoApi.addCanZhuo(canzhuo);
+				let total = 0;
+				if(indatabase){
+					total =await canZhuoApi.addCanZhuo_Food(canzhuo.canzhuo_foodArray);
+				}else{
+					total =await canZhuoApi.addCanZhuo(canzhuo);
+				}
 				console.log(this.orderFoodList);
 				console.log(canzhuo);
 				if(total > 0){
@@ -286,7 +308,6 @@
 				for (var i = 0; i < orderFoodList.length; i++) {
 					if(orderFoodList[i].count <= 0){
 						orderFoodList.splice(i,1);
-
 					}else{
 						this.orderFoodCount += orderFoodList[i].count;
 					}

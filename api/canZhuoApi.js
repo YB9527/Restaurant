@@ -47,3 +47,17 @@ var saveCanZhuo =function(canzhuoArray){
 	return api.requestPOST({url,data:canzhuoArray});
 }
 exports.saveCanZhuo = saveCanZhuo;
+
+var findCanChuoingBynum =function(canzhuonum){
+	let url = baseURL+"/canzhuo/findcanzhuoingbyzanzhuonum?canzhuonum="+canzhuonum;
+	return api.requestGETOneData({url});
+}
+exports.findCanChuoingBynum = findCanChuoingBynum;
+
+
+
+var addCanZhuo_Food =function(canzhuo_foodArray){
+	let url = baseURL+"/canzhuo/addfood";
+	return api.requestPOST({url,data:canzhuo_foodArray});
+}
+exports.addCanZhuo_Food = addCanZhuo_Food;

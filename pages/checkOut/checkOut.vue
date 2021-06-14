@@ -1,10 +1,12 @@
 <template>
 	<view class="checkOut">
-		<view class="xiandiancan" v-if="orderFoodList.length===0"><text>请先点餐</text></view>
+		<view class="xiandiancan" v-if="orderFoodList.length===0">
+			<text>...</text>
+			<!-- <image mode="aspectFit" :src="$Api.imgpriewurl+'/用餐愉快.jpg'"></image> -->
+		</view>
 	<!-- 	<view class="title"><text>8号桌</text></view> -->
 		<scroll-view v-else scroll-y="true" class="scroll ">
 			<view class="chcontent ">
-				
 				<view class="foodlist box" v-for="(canzhuo,index) in orderFoodList" :key="index">
 					<view class="canzhuodate">
 						<text class="diancannum">NO.{{index+1}}点餐</text>
@@ -28,7 +30,14 @@
 			</view>
 		</scroll-view>
 		<view class="submit" v-if="orderFoodList.length > 0">
-			<view><text>合计：</text><text class="monye">￥ {{orderFoodList | computedAmount}}</text> </view>
+			<view>
+				<text v-if="pricetotal !== orderFoodList[0].finalcharge">消费金额:￥</text><text v-if="pricetotal !== orderFoodList[0].finalcharge" style="margin-right: 20rpx; color: #FFFFFF;text-decoration:line-through;"> {{pricetotal}} </text> 
+				<text>结算:</text>
+			</view>
+			<view>
+				<text>￥</text>
+				<text class="monye"> {{orderFoodList[0].finalcharge}}</text> 
+			</view>
 			<view  class ="btn"><button type="primary" @click="settlement(orderFoodList)"> 支付</button> </view>
 		</view>
 	</view>
@@ -39,14 +48,16 @@
 	export default {
 		data() {
 			return {
+				userid:'17380646105',
 				orderFoodList:[],//餐桌几点点餐
 				canzhuonum:"",
 				reflush:false,//tab切换时，页面是否要刷新
+				pricetotal:0,
 			}
 		},
 		onLoad(option) {
 			let canzhuonum = option.canzhuonum;
-			canzhuonum=8;
+			canzhuonum=4;
 			if(canzhuonum){
 				this.canzhuonum = canzhuonum;
 				uni.setNavigationBarTitle({
@@ -65,21 +76,12 @@
 		onHide() {
 			this.reflush = true;
 		},
+		onPullDownRefresh() {
+			this.init();
+			uni.stopPullDownRefresh();
+		},
 		filters: {
-			computedAmount(orderFoodList){
-				if(!orderFoodList){
-					return 0;
-				}
-				let amount = 0; 
-				for (let orderFood of orderFoodList) {
-					for(let canzhuo_food_linke of orderFood.canzhuo_food_linke){
-						let food = canzhuo_food_linke.food;
-						amount += food.price * canzhuo_food_linke.count;
-					}
-					
-				}
-				return amount;
-			},
+			
 		},
 		methods: {
 			//查出用户所有没有结账的订单
@@ -93,9 +95,25 @@
 						}
 					
 					}
+					this.pricetotal = this.computedAmount(orderFoodList);
+					
 					
 					this.orderFoodList = orderFoodList;
 				});
+			},
+			computedAmount(orderFoodList){
+				if(!orderFoodList){
+					return 0;
+				}
+				let amount = 0; 
+				for (let orderFood of orderFoodList) {
+					for(let canzhuo_food_linke of orderFood.canzhuo_food_linke){
+						let food = canzhuo_food_linke.food;
+						amount += food.price * canzhuo_food_linke.count;
+					}
+					
+				}
+				return amount;
 			},
 			//结算账单
 			 settlement(orderFoodList){
@@ -111,6 +129,7 @@
 						for (let canzhuo of orderFoodList) {
 							canzhuo.ischeckout = 1;
 							canzhuo.checkdate= date;
+							canzhuo.checkuserid= this.userid;
 						}
 						this.orderFoodList = [];
 						canZhuoApi.saveCanZhuo(orderFoodList);
@@ -141,6 +160,10 @@
 			display: flex;
 			align-items: center;
 			justify-content: center;
+			width: 750rpx;
+			image{
+				
+			}
 		}
 		.scroll{
 			width: 700rpx;

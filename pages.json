@@ -7,7 +7,10 @@
             "path" : "pages/shopMall/index"
         }
         ,{
-            "path" : "pages/checkOut/checkOut"
+            "path" : "pages/checkOut/checkOut",
+			"style":{
+				"enablePullDownRefresh": true
+			}
         }
         ,{
             "path" : "pages/my/index",

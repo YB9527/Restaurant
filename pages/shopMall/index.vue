@@ -27,13 +27,16 @@
 							</view>
 							<view class="bottom">
 								<text class="price">￥{{food.price}}/{{food.unit | foodUnitFilter}}</text>
-								<view class="menu-add" v-show="haseCount(food,orderFoodList)" >
-									<img mode="scaleToFill" @click="setFoodCount(index,-1,food)" src="/static/images/subtract.png">
+								
+								<numcombox :unit="food.unit"  @change="foodcountchange" class="countset" :data="food" prop="count"></numcombox>
+								
+								<!-- <view class="menu-add" v-show="haseCount(food,orderFoodList)" >
+									<img mode="scaleToFill" @click="setFoodCount(-1,food)" src="/static/images/subtract.png">
 								</view>
 								{{food | foodCount(orderFoodList)}}
 								<view class="menu-add">
-									<img mode="scaleToFill" @click="setFoodCount(index,1,food)" src="/static/images/icon_add.png">
-								</view>
+									<img mode="scaleToFill" @click="setFoodCount(1,food)" src="/static/images/icon_add.png">
+								</view> -->
 							</view>
 						</view>
 					</view>
@@ -67,11 +70,11 @@
 									<text class="price">￥{{orderFood.food.price * orderFood.count}}</text>
 									
 									<view class="menu-add"  >
-										<img mode="scaleToFill" @click="setFoodCount(index,-1,orderFood.food)" src="/static/images/subtract.png">
+										<img mode="scaleToFill" @click="setFoodCount(-1,orderFood.food)" src="/static/images/subtract.png">
 									</view>
 									{{orderFood.count }}
 									<view class="menu-add">
-										<img mode="scaleToFill" @click="setFoodCount(index,1,orderFood.food)" src="/static/images/icon_add.png">
+										<img mode="scaleToFill" @click="setFoodCount(1,orderFood.food)" src="/static/images/icon_add.png">
 									</view>
 								</view>
 							</view>
@@ -95,11 +98,13 @@
 	import foodTypeApi from '@/api/foodTypeApi.js'
 	import foodApi from '@/api//foodApi.js'
 	import canZhuoApi from '@/api/canZhuoApi.js'
+	import numcombox from '@/components/numcombox.vue'
 	export default {
+		components:{numcombox},
 		data() {
 			return {
 				userid:'17380646105',
-				peopletotal:5,
+				peopletotal:3,
 				canzhuonum:-1,
 				cartFoodListShow:false,
 				currentfoodtypeid:"",
@@ -133,7 +138,7 @@
 		},
 		onLoad(option) {
 			let canzhuonum = option.canzhuonum;
-			canzhuonum=8;
+			canzhuonum=4;
 			if(canzhuonum){
 				this.canzhuonum = canzhuonum;
 				uni.setNavigationBarTitle({
@@ -247,6 +252,7 @@
 				if(canzhuo){
 					 indatabase = true;
 					 canzhuo.canzhuo_foodArray =[];
+					 
 				}else{
 					canzhuo ={
 						id:this.$Tool.uuid(),
@@ -257,6 +263,8 @@
 						peopletotal:this.peopletotal,
 					};
 				}
+				canzhuo.ischeckout = 0;
+				canzhuo.isfinish = 0;
 				let canzhuoid = canzhuo.id;
 				for (let orderfood of this.orderFoodList) {
 					let canzhuo_food = {
@@ -276,8 +284,8 @@
 				}else{
 					total =await canZhuoApi.addCanZhuo(canzhuo);
 				}
-				console.log(this.orderFoodList);
-				console.log(canzhuo);
+				//console.log(this.orderFoodList);
+				//console.log(canzhuo);
 				if(total > 0){
 					uni.showToast({
 						title: '点菜成功',
@@ -286,17 +294,26 @@
 					this.orderFoodList.splice(0,this.orderFoodList.length);
 					this.orderFoodCount = 0;
 					this.cartFoodListShow = false;
+					//计算最后结算金额
+					await canZhuoApi.computedFinalChargeById(canzhuo.id);
+					
 				}
 				
 			},
+			foodcountchange(food){
+			
+				console.log(1,food.count);
+				this.setFoodCount(food.count,food)
+			},
 			//点菜
-			setFoodCount(index,foodcount,food){
+			setFoodCount(foodcount,food){
 				let orderFoodList = this.orderFoodList;
 				//设置菜的数量
 				let have = false;
 				for (var i = 0; i < orderFoodList.length; i++) {
 					if(orderFoodList[i].food.id === food.id){
-						  orderFoodList[i].count +=  foodcount;
+						  orderFoodList[i].count =  foodcount;
+						  food.count=  orderFoodList[i].count;
 						  have = true;
 					}
 				}
@@ -319,7 +336,10 @@
 	}
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
+	.countset{
+		width: 200rpx;
+	}
 	.shopMallcontent{
 		width: 100%;
 		height: calc(100% - 50px);
@@ -364,10 +384,12 @@
 								font-weight: 600;
 							}
 						}
+						
 						.bottom {
 							display:flex;
 							justify-content: space-between;
 							margin-top: 20rpx;
+							
 							.price{
 								font-weight: 600;
 								color: #DE2A34;
@@ -500,6 +522,7 @@
 					.bottom {
 						margin-top: 20rpx;
 						.price{
+							width: 200rpx;
 							font-weight: 600;
 							color: #DE2A34;
 						}

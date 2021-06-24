@@ -1,8 +1,9 @@
 
-var ip  = "http://192.168.3.3:3333";
+//var ip  = "http://192.168.3.3:3333";
+var ip  = "http://116.62.221.111:3333";
 exports.ip = ip; 
 
-var imgpriewurl  = ip+"/imgpriew";
+var imgpriewurl  = ip+"/imgpriew/";
 exports.imgpriewurl = imgpriewurl;
 
 exports.baseURL  = ip+"/datawaiter/restaurant";

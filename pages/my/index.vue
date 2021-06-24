@@ -1,6 +1,6 @@
 <template>
-	<view>
-		<view>历史订单</view>
+	<view class="index">
+		<view><button type="primary" @click="gotoOrderRecords">历史订单</button> </view>
 	</view>
 </template>
 
@@ -12,11 +12,18 @@
 			}
 		},
 		methods: {
-			
+			gotoOrderRecords(){
+				let url = "/pages/my/orderRecords/orderRecords";
+				uni.navigateTo({
+					url
+				})
+			}
 		}
 	}
 </script>
 
-<style>
-
+<style lang="scss">
+	.index{
+		padding: 20rpx 20rpx;
+	}
 </style>

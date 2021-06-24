@@ -1,12 +1,11 @@
 <template>
-	<view  class="countset">
-		<view class="menu-add"  >
-			<!--   -->
-			<image v-show="value" mode="aspectFill" @click="setCount(data,-1)" src="/static/images/subtract.png">
+	<view  :class="data[prop]?'self':'countsetendflex'" >
+		<view class="menu-add"  v-if="selfdata && selfdata[prop]">
+			<image v-show="selfdata[prop] !== min" mode="aspectFill" @click="setCount(data,-1)" src="/static/images/subtract.png">
 		</view>
 		
-		<input v-if="unit == 0" class="input" v-model="value" type="number" />
-		<text v-else>{{value}} </text>
+		<input v-if="unit == 0 &&  selfdata[prop]" class="input" v-model="data[prop]" type="number" />
+		<text v-else-if="selfdata[prop]"> {{selfdata[prop]}}</text>
 		<view class="menu-add">
 			<image mode="aspectFill" @click="setCount(data,1)" src="/static/images/icon_add.png">
 		</view>
@@ -26,54 +25,48 @@
 			},
 			unit:{
 				default:"1",//int
-			},
-			defaultvalue :{
-				default :"",
 			}
-			
 		},
 		data(){
 			return{
-				value:"",
+				selfdata:"",
 			}
+			
 		},
 		created() {
-			if(!this.data[this.prop] === undefined){
-				this.data[this.prop] = 0;
-			}
-			this.value = this.data[this.prop];
+			this.selfdata = this.data;
+			//console.log(this.unit);
 		},
 		methods:{
 			setCount(data,value){
-				if(!this.value){
-					this.value = 0;
+				
+				data[this.prop] = data[this.prop]*1 +value*1;
+				if(data[this.prop] < this.min ){
+					data[this.prop] = this.min;
 				}
-				this.value = this.value*1 +value*1;
-				if(this.value < this.min ){
-					this.value = this.min;
-				}
-				if(this.value === this.min){
-					this.value = this.defaultvalue;
-				}
-				this.data[this.prop] = this.value;
 				this.$emit("change",data);
 			}
 		}
 	}
 </script>
 
-<style lang="scss" scoped>
-	.countset{
+<style lang="scss">
+	.countsetendflex{
 		width: 100%;
 		display: flex;
-		justify-content: space-between;
-		image{
-			width: 40rpx;
-			height: 40rpx;
-		}
-		.input {
-			
-			border-bottom: 1px solid #333333;
-		}
+		justify-content: flex-end;
+	}
+	.self{
+		width: 100%;
+		display: flex;
+		justify-content:space-between
+	}
+	image{
+		width: 40rpx;
+		height: 40rpx;
+	}
+	.input {
+		
+		border-bottom: 1px solid #333333;
 	}
 </style>

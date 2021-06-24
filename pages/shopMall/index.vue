@@ -9,14 +9,22 @@
 					 :class="'foodtype ' + (foodtype.id === currentfoodtypeid?'foodtypeactive':'')" 
 					 @click="foodtypeclick(index,foodtype)"
 					 >
-					 	<text>{{foodtype.label}}</text>
+					 <uni-badge 
+						absolute="rightTop"
+						:offset="[-10,15]"
+						type="warning"
+						:text="foodtype.foodcountsum">
+						 <text>{{foodtype.label}}</text>
+					 </uni-badge>
+					 	
 					 </view>
 				 </scroll-view>
 			</view>
 			<view class="right">
 				<scroll-view scroll-y="true">
 					<view 
-					v-for="(food,index) in foodList"
+					v-if="showfood"
+					v-for="(food,index) in currentFoodType.foodList"
 					:key="food.id"
 					class="food">
 					
@@ -27,16 +35,11 @@
 							</view>
 							<view class="bottom">
 								<text class="price">￥{{food.price}}/{{food.unit | foodUnitFilter}}</text>
+								<numcombox :unit="food.unit" @change="foodcountchange" class="countset" :data="food" prop="count"></numcombox>
 								
-								<numcombox :unit="food.unit"  @change="foodcountchange" class="countset" :data="food" prop="count"></numcombox>
-								
-								<!-- <view class="menu-add" v-show="haseCount(food,orderFoodList)" >
-									<img mode="scaleToFill" @click="setFoodCount(-1,food)" src="/static/images/subtract.png">
-								</view>
-								{{food | foodCount(orderFoodList)}}
-								<view class="menu-add">
-									<img mode="scaleToFill" @click="setFoodCount(1,food)" src="/static/images/icon_add.png">
-								</view> -->
+							</view>
+							<view v-if="food.state === 2" style="color: #F0AD4E;margin-top: 20rpx;">
+								<text>{{food.state | foodStateFilter}} </text>
 							</view>
 						</view>
 					</view>
@@ -67,15 +70,10 @@
 									<text class="label">{{orderFood.food.label}}</text>
 								</view>
 								<view class="bottom">
-									<text class="price">￥{{orderFood.food.price * orderFood.count}}</text>
+									<text class="price">￥{{orderFood.food.price * orderFood.count}}/{{orderFood.food.unit | foodUnitFilter}}</text>
 									
-									<view class="menu-add"  >
-										<img mode="scaleToFill" @click="setFoodCount(-1,orderFood.food)" src="/static/images/subtract.png">
-									</view>
-									{{orderFood.count }}
-									<view class="menu-add">
-										<img mode="scaleToFill" @click="setFoodCount(1,orderFood.food)" src="/static/images/icon_add.png">
-									</view>
+									<numcombox :unit="orderFood.food.unit" @change="foodcountchange" class="countset" :data="orderFood.food" prop="count"></numcombox>
+									
 								</view>
 							</view>
 						</view>
@@ -87,7 +85,7 @@
 			<view class="cart-part" @click="openCartInfo">
 				<view><img src="/static/images/icon_cart.png"></view>
 			</view>
-			<view class="cart-count"  @click="openCartInfo" ><text v-show="orderFoodCount !== 0"> {{orderFoodCount}}份</text> </view>
+			<view class="cart-count"  @click="openCartInfo" ><text > {{foodtypeList | allfoodCountSum}}份</text> </view>
 			<view class="cart-price">￥<span>{{orderFoodList | computedAmount}}</span></view>
 			<view class="cart-btn red" @click="ok">确定</view>
 		</view>
@@ -103,18 +101,27 @@
 		components:{numcombox},
 		data() {
 			return {
+				showfood:false,
 				userid:'17380646105',
 				peopletotal:3,
 				canzhuonum:-1,
 				cartFoodListShow:false,
-				currentfoodtypeid:"",
-				orderFoodCount:0,
+				currentFoodType:"",
 				orderFoodList:[],//点的{菜品food、数量count}
 				foodtypeList:[],
-				foodList:[],
 			}
 		},
 		filters: {
+			allfoodCountSum(foodtypeList){
+				let sum = 0;
+				foodtypeList.forEach(item=>{
+					if(item.foodcountsum){
+						sum = item.foodcountsum*1 +  sum*1;
+					}
+					
+				});
+				return sum;
+			},
 			computedAmount(orderFoodList){
 				if(!orderFoodList){
 					return 0;
@@ -163,7 +170,7 @@
 						if(foodtypeList.length > 0 &&!this.currentfoodtypeid ){
 							this.currentfoodtypeid = foodtypeList[0].id;
 						}
-						this.findFoodByTypeId(this.currentfoodtypeid);
+						this.findFoodByType(foodtypeList[0]);
 					});
 			
 			},
@@ -171,19 +178,30 @@
 				return foodTypeApi.findAll();
 			},
 			//根据食物类型获取所有食物
-			findFoodByTypeId(typeid){
-				foodApi.findFoodByTypeId(typeid)
-					.then(foods=>{
-						//console.log(foods);
-						for (let food of foods) {
-							food.url = this.$Api.imgpriewurl+food.imageurl;
-							//console.log(food.url);
-						}
-						if(this.foodList && this.foodList.length > 0){
-							this.foodList.splice(0,this.foodList.length);
-						}
-						this.foodList.push(...foods);
-					});
+			async findFoodByType(foodtype){
+				this.showfood = false;
+				let typeid = foodtype.id;
+				if(this.foodList && this.foodList.length > 0){
+					this.foodList.splice(0,this.foodList.length);
+				}
+				if(!foodtype.foodList){
+					let foods =await foodApi.findFoodByTypeId(typeid);
+					for (let food of foods) {
+						food.url = this.$Api.imgpriewurl+food.imageurl;
+						//console.log(food.url);
+						food.count = 0;
+						
+					}
+					foodtype.foodList = foods;
+				}else{
+					await setTimeout(()=>{
+						
+					},100);
+				}
+				this.currentFoodType = foodtype;
+				this.showfood = true;
+				//console.log(this.foodList);
+					
 			},
 			//清空购物车
 			clearOrderCart(){
@@ -195,6 +213,7 @@
 			},
 			//打开购物清单
 			openCartInfo(){
+
 				this.cartFoodListShow = !this.cartFoodListShow;
 				
 			},
@@ -213,7 +232,7 @@
 					return;
 				}
 				this.currentfoodtypeid = foodtpe.id;
-				this.findFoodByTypeId(foodtpe.id);
+				this.findFoodByType(foodtpe);
 			},
 			//根据食物类型获取所有食物
 			/* findFoodByTypeId2(typeid){
@@ -296,15 +315,33 @@
 					this.cartFoodListShow = false;
 					//计算最后结算金额
 					await canZhuoApi.computedFinalChargeById(canzhuo.id);
-					
+					//清楚菜数量
+					this.foodList.forEach(item=>{
+						item.count = 0;
+					})
 				}
 				
 			},
 			foodcountchange(food){
-			
-				console.log(1,food.count);
-				this.setFoodCount(food.count,food)
+				//console.log(1,food.count);
+				this.setFoodCount(food.count,food);
+				this.computedFoodTypeCount(food);
 			},
+			computedFoodTypeCount(food){
+			//计算当前类型总共点了多少餐
+				for(let type of this.foodtypeList){
+					if(type.id === food.foodtypeid){
+						let foodcountsum = 0;
+						for(let food of type.foodList){
+							if(food.count){
+								foodcountsum = food.count *1 + foodcountsum*1;
+							}
+						}
+						type.foodcountsum = foodcountsum;
+					}
+				}
+			},
+			
 			//点菜
 			setFoodCount(foodcount,food){
 				let orderFoodList = this.orderFoodList;
@@ -321,15 +358,18 @@
 					orderFoodList.push({food,count:1});
 				}
 				this.orderFoodCount = 0;
+				//console.log(foodcount);
 				//清除不要的菜
 				for (var i = 0; i < orderFoodList.length; i++) {
 					if(orderFoodList[i].count <= 0){
 						orderFoodList.splice(i,1);
+						
 					}else{
 						this.orderFoodCount += orderFoodList[i].count;
 					}
 					
 				}
+				
 			}
 			
 		}
@@ -358,9 +398,9 @@
 			background:#FFFFFF;
 			.foodlist{
 				min-height: 300rpx;
-				
+				max-height: 700rpx;
 				/deep/ .uni-scroll-view{
-					max-height: 80%;
+					max-height: 700rpx;
 				}
 				.food{
 					padding: 20rpx;
@@ -393,7 +433,7 @@
 							.price{
 								font-weight: 600;
 								color: #DE2A34;
-								margin-right: 150rpx;
+								
 							}
 							img {
 								width: 45rpx;
@@ -495,10 +535,12 @@
 			scroll-view{
 				width: 100%;
 			}
-			width: 550rpx;
-			background-color: #FFFFFF;
+			width: 530rpx;
+			
 			.food{
-				padding: 20rpx;
+				background:#FFFFFF;
+				border-radius: 8rpx;
+				margin-bottom: 20rpx;
 				width: 100%;
 				display: flex;
 				image {
@@ -508,6 +550,7 @@
 					margin-right: 10rpx;
 				}
 				.content{
+					
 					width: 300rpx;
 					display: flex;
 					

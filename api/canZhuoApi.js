@@ -121,3 +121,11 @@ exports.update = update;
 	await update(canzhuo);
 }
 exports.computedFinalChargeById = computedFinalChargeById;
+
+//根据消费用户的id查询除消费记录
+ var findByCheckuserid =async function(checkuserid){
+	let url = baseURL+"/canzhuo/findbycheckuserid?checkuserid="+checkuserid;
+	return api.requestGET({url});
+	
+}
+exports.findByCheckuserid = findByCheckuserid;

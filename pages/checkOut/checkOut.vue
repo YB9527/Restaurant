@@ -8,10 +8,10 @@
 		<scroll-view v-else scroll-y="true" class="scroll ">
 			<view class="chcontent ">
 				<view class="foodlist box" v-for="(canzhuo,index) in orderFoodList" :key="index">
-					<view class="canzhuodate">
+					<!-- <view class="canzhuodate">
 						<text class="diancannum">NO.{{index+1}}点餐</text>
 						<text class="date">{{canzhuo.date}}</text>
-					</view>
+					</view> -->
 					<view class="food" v-for="(canzhuo_food_linke) in canzhuo.canzhuo_food_linke" :key="canzhuo_food_linke.id">
 						<view class="left">
 							<image :src="canzhuo_food_linke.food.imageurl" mode="aspectFill"></image>
@@ -26,7 +26,6 @@
 						</view>
 					</view>
 				</view>
-			
 			</view>
 		</scroll-view>
 		<view class="submit" v-if="orderFoodList.length > 0">
@@ -87,7 +86,7 @@
 			//查出用户所有没有结账的订单
 			init(){
 				canZhuoApi.findOrderFoodByCanZhuoNum(this.canzhuonum).then(orderFoodList=>{
-					console.log(orderFoodList);
+					//console.log(orderFoodList);
 					for (let order of orderFoodList) {
 						
 						for (let canzhuo_food_linke of order.canzhuo_food_linke) {

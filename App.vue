@@ -18,7 +18,7 @@
 	page, uni-page-body {
 		height: 100%;
 		background-color: #F1F1F1;
-	}
+	} 
 	
 	.box {
 		padding: 10px;

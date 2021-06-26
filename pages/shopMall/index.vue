@@ -1,6 +1,6 @@
 <template>
-	<view class="shopMallcontent">
-		<view class="shopMall">
+	<view class="shopMallcontent" >
+		<view class="shopMall" >
 			<view class="left">
 				 <scroll-view scroll-y="true">
 					 <view
@@ -35,7 +35,7 @@
 							</view>
 							<view class="bottom">
 								<text class="price">￥{{food.price}}/{{food.unit | foodUnitFilter}}</text>
-								<numcombox :unit="food.unit" @change="foodcountchange" class="countset" :data="food" prop="count"></numcombox>
+								<numcombox v-if="food.state === 1 " :unit="food.unit" @change="foodcountchange" class="countset" :data="food" prop="count"></numcombox>
 								
 							</view>
 							<view v-if="food.state === 2" style="color: #F0AD4E;margin-top: 20rpx;">
@@ -70,7 +70,7 @@
 									<text class="label">{{orderFood.food.label}}</text>
 								</view>
 								<view class="bottom">
-									<text class="price">￥{{orderFood.food.price * orderFood.count}}/{{orderFood.food.unit | foodUnitFilter}}</text>
+									<text class="price">￥{{orderFood.food.price }}/{{orderFood.food.unit | foodUnitFilter}}</text>
 									
 									<numcombox :unit="orderFood.food.unit" @change="foodcountchange" class="countset" :data="orderFood.food" prop="count"></numcombox>
 									
@@ -101,6 +101,7 @@
 		components:{numcombox},
 		data() {
 			return {
+				
 				showfood:false,
 				userid:'17380646105',
 				peopletotal:3,
@@ -112,6 +113,10 @@
 			}
 		},
 		filters: {
+			test(a){
+				console.log(a);
+				return a.foodcountsum;
+			},
 			allfoodCountSum(foodtypeList){
 				let sum = 0;
 				foodtypeList.forEach(item=>{
@@ -164,13 +169,21 @@
 		
 		methods: {
 			init(){
+				
+				uni.showLoading({
+					title:"请稍等..."
+				});
 				this.findAllFoodType()
 					.then((foodtypeList)=>{
-						this.foodtypeList = foodtypeList;
+						if(this.foodtypeList.length > 0){
+							this.foodtypeList.splice(0,this.foodtypeList.length);
+						}
+						this.foodtypeList.push(...foodtypeList);
 						if(foodtypeList.length > 0 &&!this.currentfoodtypeid ){
 							this.currentfoodtypeid = foodtypeList[0].id;
 						}
-						this.findFoodByType(foodtypeList[0]);
+						this.findFoodByType(this.currentFoodType?this.currentFoodType:foodtypeList[0]);
+						uni.hideLoading();
 					});
 			
 			},
@@ -217,15 +230,7 @@
 				this.cartFoodListShow = !this.cartFoodListShow;
 				
 			},
-			//此食物有数量吗？
-			haseCount(food, orderFoodList){
-				for (let orderFood of orderFoodList) {
-					if(orderFood.food.id === food.id){
-						return true;
-					}
-				}
-				return false;
-			},
+			
 			//菜类被点击
 			foodtypeclick(index,foodtpe){
 				if(this.currentfoodtypeid === foodtpe.id){
@@ -234,24 +239,11 @@
 				this.currentfoodtypeid = foodtpe.id;
 				this.findFoodByType(foodtpe);
 			},
-			//根据食物类型获取所有食物
-			/* findFoodByTypeId2(typeid){
-				if(typeid === 1){
-					this.foodList  = [
-						{id:2,label:"羊肉汤",unit:"斤",describe:"",price:100,img:"https://qcloud.dpfile.com/pc/9CTG3egYVhA4qDEGPZysOWm-CMHWxdqKtHOfGwwz2KJ3SQvBEuZcM3cJ5XDTpMvP5g_3Oo7Z9EXqcoVvW9arsw.jpg"},
-						{id:1,label:"牛肉",unit:"份",describe:"",price:38,img:"https://qcloud.dpfile.com/pc/EgOYGoX6cUY42YoeOsr3gBzxSl7EJ-GEy_OaLloqJuVzMT5nCQRqO7l_onbFDiHq5g_3Oo7Z9EXqcoVvW9arsw.jpg"},
-						{id:3,label:"鸭肠",unit:"份",describe:"",price:22,img:"https://qcloud.dpfile.com/pc/3HHHfRFJIXkCc2NNVj3yENqeSoFGZUw_rfmojNWPSe6umY1XpOkGMGNh02O5O4g-5g_3Oo7Z9EXqcoVvW9arsw.jpg"},
-						{id:4,label:"鹅肠",unit:"份",describe:"",price:22,img:"https://p1.meituan.net/poirichness/menu_808644_446406954.jpg@130w_130h_1e_1c"},
-						{id:5,label:"金针菇",unit:"份",describe:"",price:10,img:"https://p1.meituan.net/shaitu/99dd843cacf39925b39f8a60058a9c9a1497525.jpg"},
-						{id:6,label:"糍粑",unit:"份",describe:"",price:12,img:"https://p1.meituan.net/shaitu/7b9e90a902edef95123d8124c4fe513f2103547.jpg"},
-						{id:7,label:"糍粑",unit:"份",describe:"",price:12,img:"https://p1.meituan.net/shaitu/7b9e90a902edef95123d8124c4fe513f2103547.jpg"},
-						{id:8,label:"糍",unit:"份",describe:"",price:12,img:"https://p1.meituan.net/shaitu/7b9e90a902edef95123d8124c4fe513f2103547.jpg"},
-					];
-				}else{
-					this.foodList = [];
-				}
-			}, */
+			
 			async ok(){
+				
+				
+				
 				if(this.orderFoodList.length === 0){
 					uni.showToast({
 					    title: '你还没有点菜',
@@ -316,16 +308,35 @@
 					//计算最后结算金额
 					await canZhuoApi.computedFinalChargeById(canzhuo.id);
 					//清楚菜数量
-					this.foodList.forEach(item=>{
-						item.count = 0;
-					})
+					
+					//uni-badge 更新有bug ，要先该包含的文字才有效
+					for(let foodtype of this.foodtypeList){
+						console.log(foodtype.foodcountsum);
+						foodtype.foodcountsum = 0;
+						foodtype.label = foodtype.label+"a";
+						if(foodtype.foodList){
+							foodtype.foodList.forEach(food=>{
+								food.count = 0;
+							})
+						}
+					}
+					for(let foodtype of this.foodtypeList){
+						foodtype.label =foodtype.label.substring(0,foodtype.label.length-1);
+					}
+					
+					//this.init();
+					
+					//this.computedFoodTypeCountAll();
+				
+					//console.log(this.foodtypeList);
 				}
 				
 			},
 			foodcountchange(food){
 				//console.log(1,food.count);
 				this.setFoodCount(food.count,food);
-				this.computedFoodTypeCount(food);
+				//this.computedFoodTypeCount(food);
+				this.computedFoodTypeCountAll();
 			},
 			computedFoodTypeCount(food){
 			//计算当前类型总共点了多少餐
@@ -340,8 +351,22 @@
 						type.foodcountsum = foodcountsum;
 					}
 				}
+
 			},
-			
+			computedFoodTypeCountAll(){
+			//计算当前类型总共点了多少餐
+				for(let type of this.foodtypeList){
+					let foodcountsum = 0;
+					if(type.foodList){
+						for(let food of type.foodList){
+							if(food.count){
+								foodcountsum = food.count *1 + foodcountsum*1;
+							}
+						}
+					}
+					type.foodcountsum = foodcountsum;
+				}
+			},
 			//点菜
 			setFoodCount(foodcount,food){
 				let orderFoodList = this.orderFoodList;

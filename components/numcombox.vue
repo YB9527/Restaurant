@@ -35,6 +35,7 @@
 		},
 		created() {
 			this.selfdata = this.data;
+			//console.log(111);
 			//console.log(this.unit);
 		},
 		methods:{

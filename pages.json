@@ -56,7 +56,7 @@
 	            "text" : "买单"
 	        },
 	        {
-	            "pagePath" : "pages/my/index",
+	            "pagePath" : "pages/my/orderRecords/orderRecords",
 	            "iconPath" : "static/images/icon_my.png",
 	            "selectedIconPath" : "static/images/icon_my.png",
 	            "text" : "我的"

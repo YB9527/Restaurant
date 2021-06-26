@@ -7,12 +7,12 @@
 	<!-- 	<view class="title"><text>8号桌</text></view> -->
 		<scroll-view v-else scroll-y="true" class="scroll ">
 			<view class="chcontent ">
-				<view class="foodlist box" v-for="(canzhuo,index) in orderFoodList" :key="index">
+				<view class="foodlist " v-for="(canzhuo,index) in orderFoodList" :key="index">
 					<!-- <view class="canzhuodate">
 						<text class="diancannum">NO.{{index+1}}点餐</text>
 						<text class="date">{{canzhuo.date}}</text>
 					</view> -->
-					<view class="food" v-for="(canzhuo_food_linke) in canzhuo.canzhuo_food_linke" :key="canzhuo_food_linke.id">
+					<view class="food box" v-for="(canzhuo_food_linke) in canzhuo.canzhuo_food_linke" :key="canzhuo_food_linke.id">
 						<view class="left">
 							<image :src="canzhuo_food_linke.food.imageurl" mode="aspectFill"></image>
 							<view class="lefttext">
@@ -227,7 +227,7 @@
 		}
 		.submit{
 			height: 150rpx;
-			background-color: #999999;
+			background-color: #f8f8f8;
 			display: flex;
 			justify-content: flex-end;
 			align-items: center;

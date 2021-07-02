@@ -54,9 +54,9 @@
 			</view>
 			<view class="cart-food-list" >
 				<view class="top">
-					<text>已选商品</text> 
-					<view><text @click="cartFoodListShow = false">下拉</text></view>
-					<view><text @click="clearOrderCart">清空</text></view>
+					<text>已选菜品</text> 
+					<view><text  class="cuIcon-unfold xiala" @click="cartFoodListShow = false"></text></view>
+					<view><text  class="cuIcon-delete"  @click="clearOrderCart"></text></view>
 				</view>
 				<view class="foodlist">
 					<scroll-view  scroll-y="true">
@@ -71,9 +71,7 @@
 								</view>
 								<view class="bottom">
 									<text class="price">￥{{orderFood.food.price }}/{{orderFood.food.unit | foodUnitFilter}}</text>
-									
 									<numcombox :unit="orderFood.food.unit" @change="foodcountchange" class="countset" :data="orderFood.food" prop="count"></numcombox>
-									
 								</view>
 							</view>
 						</view>
@@ -87,7 +85,8 @@
 			</view>
 			<view class="cart-count"  @click="openCartInfo" ><text > {{foodtypeList | allfoodCountSum}}份</text> </view>
 			<view class="cart-price">￥<span>{{orderFoodList | computedAmount}}</span></view>
-			<view class="cart-btn red" @click="ok">确定</view>
+			<view class="cart-btn yellow" v-if="!cartFoodListShow" @click="cartFoodListShow = true">查看</view>
+			<view class="cart-btn red" v-else @click="ok">下单</view>
 		</view>
 	</view>
 </template>
@@ -121,10 +120,11 @@
 				let sum = 0;
 				foodtypeList.forEach(item=>{
 					if(item.foodcountsum){
-						sum = item.foodcountsum*1 +  sum*1;
+						sum = (item.foodcountsum*1 +  sum*1).toFixed(1)*1;
 					}
 					
 				});
+				//console.log(sum);
 				return sum;
 			},
 			computedAmount(orderFoodList){
@@ -135,7 +135,7 @@
 				for (let orderFood of orderFoodList) {
 					amount += orderFood.food.price * orderFood.count;
 				}
-				
+				amount = amount.toFixed(1)*1;
 				return amount;
 			},
 			foodCount(food, orderFoodList){
@@ -218,10 +218,23 @@
 			},
 			//清空购物车
 			clearOrderCart(){
-				let orderFoodList = this.orderFoodList;
-				if(orderFoodList.length > 0){
-					orderFoodList.splice(0,orderFoodList.length);
+				//uni-badge 更新有bug ，要先该包含的文字才有效
+				this.orderFoodList.splice(0,this.orderFoodList.length);
+				this.orderFoodCount = 0;
+				for(let foodtype of this.foodtypeList){
+					//console.log(foodtype.foodcountsum);
+					foodtype.foodcountsum = 0;
+					foodtype.label = foodtype.label+"a";
+					if(foodtype.foodList){
+						foodtype.foodList.forEach(food=>{
+							food.count = 0;
+						})
+					}
 				}
+				for(let foodtype of this.foodtypeList){
+					foodtype.label =foodtype.label.substring(0,foodtype.label.length-1);
+				}
+				
 				this.cartFoodListShow = false;
 			},
 			//打开购物清单
@@ -302,27 +315,12 @@
 						title: '点菜成功',
 						duration: 1000
 					});
-					this.orderFoodList.splice(0,this.orderFoodList.length);
-					this.orderFoodCount = 0;
+				
 					this.cartFoodListShow = false;
 					//计算最后结算金额
 					await canZhuoApi.computedFinalChargeById(canzhuo.id);
 					//清楚菜数量
-					
-					//uni-badge 更新有bug ，要先该包含的文字才有效
-					for(let foodtype of this.foodtypeList){
-						console.log(foodtype.foodcountsum);
-						foodtype.foodcountsum = 0;
-						foodtype.label = foodtype.label+"a";
-						if(foodtype.foodList){
-							foodtype.foodList.forEach(food=>{
-								food.count = 0;
-							})
-						}
-					}
-					for(let foodtype of this.foodtypeList){
-						foodtype.label =foodtype.label.substring(0,foodtype.label.length-1);
-					}
+					this.clearOrderCart();
 					
 					//this.init();
 					
@@ -348,7 +346,8 @@
 								foodcountsum = food.count *1 + foodcountsum*1;
 							}
 						}
-						type.foodcountsum = foodcountsum;
+						type.foodcountsum = foodcountsum.toFixed(1)*1;
+						
 					}
 				}
 
@@ -364,7 +363,8 @@
 							}
 						}
 					}
-					type.foodcountsum = foodcountsum;
+					type.foodcountsum = foodcountsum.toFixed(1)*1;
+					
 				}
 			},
 			//点菜
@@ -404,6 +404,14 @@
 <style lang="scss" scoped>
 	.countset{
 		width: 200rpx;
+	}
+	.xiala{
+		font-size: 50rpx;
+		color: #DD514C;
+	}
+	.cuIcon-delete{
+		font-size: 50rpx;
+		color: #F43F3B;
 	}
 	.shopMallcontent{
 		width: 100%;
@@ -535,6 +543,10 @@
 		}
 		.red{
 			background: #DE2A35;
+		}
+		.yellow{
+			color: #F0AD4E;
+			background-color: #808080
 		}
 	}
 	.shopMall{

@@ -30,7 +30,7 @@
 		</scroll-view>
 		<view class="submit" v-if="orderFoodList.length > 0">
 			<view>
-				<text v-if="pricetotal !== orderFoodList[0].finalcharge">消费金额:￥</text><text v-if="pricetotal !== orderFoodList[0].finalcharge" style="margin-right: 20rpx; color: #FFFFFF;text-decoration:line-through;"> {{pricetotal}} </text> 
+				<text v-if="pricetotal !== orderFoodList[0].finalcharge">消费金额:￥</text><text v-if="pricetotal !== orderFoodList[0].finalcharge" style="margin-right: 20rpx; color: #000000;text-decoration:line-through;"> {{pricetotal}} </text> 
 				<text>结算:</text>
 			</view>
 			<view>
@@ -90,7 +90,7 @@
 					for (let order of orderFoodList) {
 						
 						for (let canzhuo_food_linke of order.canzhuo_food_linke) {
-							canzhuo_food_linke.food.imageurl = this.$Api.imgpriewurl +'\\'+canzhuo_food_linke.food.imageurl;
+							canzhuo_food_linke.food.imageurl = this.$Api.imgpriewurl +canzhuo_food_linke.food.imageurl;
 						}
 					
 					}
@@ -167,7 +167,8 @@
 		.scroll{
 			width: 700rpx;
 			height: calc(100% - 130rpx);
-			padding: 0 20rpx 20rpx 20rpx;
+			margin: 0 auto;
+			
 			.canzhuodate{
 				display: flex;
 				align-items: center;

@@ -1,13 +1,14 @@
 <template>
-	<view  :class="data[prop]?'self':'countsetendflex'" >
+	<view  :class="selfdata[prop]?'self':'countsetendflex'" >
 		<view class="menu-add"  v-if="selfdata && selfdata[prop]">
-			<image v-show="selfdata[prop] !== min" mode="aspectFill" @click="setCount(data,-1)" src="/static/images/subtract.png">
+			<image v-show="selfdata[prop] !== min" mode="aspectFill" @click="setCount(selfdata,-1)" src="/static/images/subtract.png">
 		</view>
 		
-		<input v-if="unit == 0 &&  selfdata[prop]" @input="change" type="digit" class="input" v-model="data[prop]"  />
+		<input v-if="unit == 0 &&  selfdata[prop]" @input="change" type="digit" class="input" v-model="selfdata[prop]"  />
+		
 		<text v-else-if="selfdata[prop]"> {{selfdata[prop]}}</text>
 		<view class="menu-add">
-			<image mode="aspectFill" @click="setCount(data,1)" src="/static/images/icon_add.png">
+			<image mode="aspectFill" @click="setCount(selfdata,1)" src="/static/images/icon_add.png">
 		</view>
 	</view>
 </template>
@@ -47,16 +48,20 @@
 					data[this.prop] = this.min;
 				}
 				data[this.prop] =data[this.prop].toFixed(1)*1;
+				this.data[this.prop] =data[this.prop];
 				this.$emit("change",data);
+				
+				//console.log(11,this.data);
+				//console.log(12,this.selfdata);
 			},
 			change(val){
 				//console.log(val);
-				let data = this.data;
+				let data = this.selfdata;
 				 val = data[this.prop]*1;
 				data[this.prop] =val.toFixed(1)*1;
 				//data[this.prop] = val*1;
 				this.$emit("change",data);
-				//console.log(11,this.data[this.prop]);
+				
 			}
 		}
 	}
@@ -67,6 +72,7 @@
 		width: 100%;
 		display: flex;
 		justify-content: flex-end;
+		
 	}
 	.self{
 		width: 100%;
@@ -78,7 +84,7 @@
 		height: 40rpx;
 	}
 	.input {
-		
+		padding-left: 20rpx;
 		border-bottom: 1px solid #333333;
 	}
 </style>

@@ -26,7 +26,7 @@
             "path" : "pages/my/orderRecords/orderRecords",
             "style" :                                                                                    
             {
-				"navigationBarTitleText": "历史订单",
+				"navigationBarTitleText": "历史记录",
                 "enablePullDownRefresh": false
             }
             
@@ -65,7 +65,7 @@
 	            "pagePath" : "pages/checkOut/checkOut",
 	            "iconPath" : "static/images/icon_money.png",
 	            "selectedIconPath" : "static/images/icon_money.png",
-	            "text" : "买单"
+	            "text" : "菜单"
 	        },
 	        {
 	            "pagePath" : "pages/my/index",

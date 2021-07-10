@@ -1,14 +1,11 @@
 <script>
 	export default {
 		onLaunch: function() {
-			console.log('App Launch')
 			uni.vue = this;
 		},
 		onShow: function() {
-			console.log('App Show')
 		},
 		onHide: function() {
-			console.log('App Hide')
 		}
 	}
 </script>
@@ -40,5 +37,12 @@
 		margin: 20px auto;
 		box-shadow: 0upx 5upx 20upx rgba(0, 0, 0, 0.1);
 	
+	}
+	.row{
+		display: flex;
+	}
+	.sprow{
+		display: flex;
+		justify-content: space-between;
 	}
 </style>

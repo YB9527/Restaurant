@@ -17,27 +17,33 @@
 							<image :src="canzhuo_food_linke.food.imageurl" mode="aspectFill"></image>
 							<view class="lefttext">
 								<text class="foodtname">{{canzhuo_food_linke.food.label}}</text>
-								<text> x {{canzhuo_food_linke.count}}</text>
-								<text class="date">  {{canzhuo_food_linke.date}}</text>
+								<view class="sprow">
+									<text> x {{canzhuo_food_linke.count}}</text>
+									<view class="right">
+										<text class="price">￥ {{canzhuo_food_linke.food.price * canzhuo_food_linke.count}}</text>
+									</view>
+								</view>
+								
+								<!-- <text class="date">  {{canzhuo_food_linke.date}}</text> -->
 							</view>
 						</view>
-						<view class="right">
-							<text class="price">￥ {{canzhuo_food_linke.food.price * canzhuo_food_linke.count}}</text>
-						</view>
+						
 					</view>
 				</view>
 			</view>
 		</scroll-view>
+		
+		
 		<view class="submit" v-if="orderFoodList.length > 0">
 			<view>
-				<text v-if="pricetotal !== orderFoodList[0].finalcharge">消费金额:￥</text><text v-if="pricetotal !== orderFoodList[0].finalcharge" style="margin-right: 20rpx; color: #000000;text-decoration:line-through;"> {{pricetotal}} </text> 
-				<text>结算:</text>
+				<text v-if="pricetotal !== orderFoodList[0].finalcharge">消费额:￥</text><text v-if="pricetotal !== orderFoodList[0].finalcharge" style="margin-right: 20rpx; color: #000000;text-decoration:line-through;"> {{pricetotal}} </text> 
+				<text>总额:</text>
 			</view>
 			<view>
 				<text>￥</text>
 				<text class="monye"> {{orderFoodList[0].finalcharge}}</text> 
 			</view>
-			<view  class ="btn"><button type="primary" @click="settlement(orderFoodList)"> 支付</button> </view>
+			<view  class ="btn"><button type="primary" @click="settlement(orderFoodList)"> 离桌</button> </view>
 		</view>
 	</view>
 </template>
@@ -56,7 +62,9 @@
 		},
 		onLoad(option) {
 			let canzhuonum = option.canzhuonum;
-			canzhuonum=4;
+			if(!canzhuonum){
+				canzhuonum=4;
+			}
 			if(canzhuonum){
 				this.canzhuonum = canzhuonum;
 				uni.setNavigationBarTitle({
@@ -117,7 +125,7 @@
 			//结算账单
 			 settlement(orderFoodList){
 				uni.showLoading({
-					title: '支付中...',
+					title: '离桌中...',
 					mask: false
 				});
 				//支付成功
@@ -133,7 +141,7 @@
 						this.orderFoodList = [];
 						canZhuoApi.saveCanZhuo(orderFoodList);
 						uni.showToast({
-							title:"支付成功",
+							title:"提交成功",
 						})
 					})
 				}, 1000);
@@ -143,6 +151,11 @@
 </script>
 
 <style lang="scss">
+	.sprow{
+		margin-top: 20rpx;
+		display: flex;
+		align-items: center;
+	}
 	.date{
 		margin-top: 20rpx;
 		color: #999999;
@@ -218,6 +231,7 @@
 					}
 				}
 				.right{
+					margin-left: 20rpx;
 					font-weight: 600;
 					font-size: $uni-font-size-lg;
 					.price{

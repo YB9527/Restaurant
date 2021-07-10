@@ -1,13 +1,14 @@
 <template>
 	<view class="shopMallcontent" >
-		<view class="shopMall" >
+		<view class="shopMall" v-if="!cartFoodListShow" >
 			<view class="left">
 				 <scroll-view scroll-y="true">
 					 <view
 					 v-for="(foodtype,index) in foodtypeList"
 					 :key="foodtype.id"
-					 :class="'foodtype ' + (foodtype.id === currentfoodtypeid?'foodtypeactive':'')" 
+					 :class="'foodtype ' + (foodtype.id === currentFoodType.id?'foodtypeactive':'')" 
 					 @click="foodtypeclick(index,foodtype)"
+					 v-if="foodtype.count"
 					 >
 					 <uni-badge 
 						absolute="rightTop"
@@ -36,7 +37,6 @@
 							<view class="bottom">
 								<text class="price">￥{{food.price}}/{{food.unit | foodUnitFilter}}</text>
 								<numcombox v-if="food.state === 1 " :unit="food.unit" @change="foodcountchange" class="countset" :data="food" prop="count"></numcombox>
-								
 							</view>
 							<view v-if="food.state === 2" style="color: #F0AD4E;margin-top: 20rpx;">
 								<text>{{food.state | foodStateFilter}} </text>
@@ -47,46 +47,47 @@
 			</view> 
 			
 		</view>
-		<uni-transition  :duration="500" :mode-class="['fade', 'slide-bottom']"  :show="cartFoodListShow">
-			
-			<view class="dialogback" @click="cartFoodListShow = false">
-				<!-- 购物清单背景遮幕 -->
-			</view>
-			<view class="cart-food-list" >
+		<!-- <uni-transition  class="cart" :duration="500" :mode-class="['fade', 'slide-bottom']" :show="cartFoodListShow">
+			</uni-transition> -->
+			<!-- <view class="dialogback" @click="cartFoodListShow = false">
+				<!-- 购物清单背景遮幕
+			</view> -->
+			<view class="cart-food-list" v-if="cartFoodListShow">
 				<view class="top">
 					<text>已选菜品</text> 
 					<view><text  class="cuIcon-unfold xiala" @click="cartFoodListShow = false"></text></view>
 					<view><text  class="cuIcon-delete"  @click="clearOrderCart"></text></view>
 				</view>
 				<view class="foodlist">
-					<scroll-view  scroll-y="true">
+					<scroll-view class="foodlist"  scroll-y="true">
 						<view 
 						v-for="(orderFood,index) in orderFoodList"
-						:key="index"
+						:key="orderFood.id"
 						class="food">
-							<image :src="orderFood.food.url" mode="aspectFill"></image>
+							<image :src="orderFood.url" mode="aspectFill"></image>
 							<view class="content">
 								<view class="top">
-									<text class="label">{{orderFood.food.label}}</text>
+									<text class="label">{{orderFood.label}}</text>
 								</view>
 								<view class="bottom">
-									<text class="price">￥{{orderFood.food.price }}/{{orderFood.food.unit | foodUnitFilter}}</text>
-									<numcombox :unit="orderFood.food.unit" @change="foodcountchange" class="countset" :data="orderFood.food" prop="count"></numcombox>
+									<text class="price">￥{{orderFood.price }}/{{orderFood.unit | foodUnitFilter}}</text>
+									
+									<numcombox :unit="orderFood.unit" @change="Orderfoodcountchange" class="countset" :data="orderFood" prop="count"></numcombox>
 								</view>
 							</view>
 						</view>
 					</scroll-view>
 				</view>
 			</view>
-		</uni-transition>
+		
 		<view class="fix-cart">
 			<view class="cart-part" @click="openCartInfo">
 				<view><img src="/static/images/icon_cart.png"></view>
 			</view>
-			<view class="cart-count"  @click="openCartInfo" ><text > {{foodtypeList | allfoodCountSum}}份</text> </view>
+			<view class="cart-count"  @click="openCartInfo" ><text > {{orderFoodList | allfoodCountSum}}份</text> </view>
 			<view class="cart-price">￥<span>{{orderFoodList | computedAmount}}</span></view>
 			<view class="cart-btn yellow" v-if="!cartFoodListShow" @click="cartFoodListShow = true">查看</view>
-			<view class="cart-btn red" v-else @click="ok">下单</view>
+			<view class="cart-btn red" v-else @click="ok">提交</view>
 		</view>
 	</view>
 </template>
@@ -100,7 +101,6 @@
 		components:{numcombox},
 		data() {
 			return {
-				
 				showfood:false,
 				userid:'17380646105',
 				peopletotal:3,
@@ -116,26 +116,30 @@
 				console.log(a);
 				return a.foodcountsum;
 			},
-			allfoodCountSum(foodtypeList){
+			allfoodCountSum(orderFoodList){
 				let sum = 0;
-				foodtypeList.forEach(item=>{
-					if(item.foodcountsum){
-						sum = (item.foodcountsum*1 +  sum*1).toFixed(1)*1;
+				orderFoodList.forEach(item=>{
+					if(item.count){
+						sum = (item.count*1 +  sum*1).toFixed(1)*1;
 					}
 					
 				});
-				//console.log(sum);
+				//console.log("sum",sum);
+				//console.log("orderFoodList",orderFoodList);
 				return sum;
 			},
 			computedAmount(orderFoodList){
+				
 				if(!orderFoodList){
 					return 0;
 				}
 				let amount = 0; 
 				for (let orderFood of orderFoodList) {
-					amount += orderFood.food.price * orderFood.count;
+					amount += orderFood.price * orderFood.count;
 				}
 				amount = amount.toFixed(1)*1;
+				
+				//console.log("amount",orderFoodList);
 				return amount;
 			},
 			foodCount(food, orderFoodList){
@@ -150,7 +154,9 @@
 		},
 		onLoad(option) {
 			let canzhuonum = option.canzhuonum;
-			canzhuonum=4;
+			if(!canzhuonum){
+				canzhuonum=4;
+			}
 			if(canzhuonum){
 				this.canzhuonum = canzhuonum;
 				uni.setNavigationBarTitle({
@@ -205,6 +211,7 @@
 						food.count = 0;
 						
 					}
+					//console.log(1,foods);
 					foodtype.foodList = foods;
 				}else{
 					await setTimeout(()=>{
@@ -212,15 +219,16 @@
 					},100);
 				}
 				this.currentFoodType = foodtype;
+				//foodtype.foodcountsum = 3;
 				this.showfood = true;
-				//console.log(this.foodList);
+				//console.log(this.currentFoodType);
 					
 			},
 			//清空购物车
 			clearOrderCart(){
 				//uni-badge 更新有bug ，要先该包含的文字才有效
 				this.orderFoodList.splice(0,this.orderFoodList.length);
-				this.orderFoodCount = 0;
+				//this.orderFoodCount = 0;
 				for(let foodtype of this.foodtypeList){
 					//console.log(foodtype.foodcountsum);
 					foodtype.foodcountsum = 0;
@@ -234,7 +242,10 @@
 				for(let foodtype of this.foodtypeList){
 					foodtype.label =foodtype.label.substring(0,foodtype.label.length-1);
 				}
-				
+				this.currentFoodType.foodList.forEach(item=>{
+					item.count = 0;
+				});
+				//console.log(this.currentFoodType.foodList);
 				this.cartFoodListShow = false;
 			},
 			//打开购物清单
@@ -254,9 +265,6 @@
 			},
 			
 			async ok(){
-				
-				
-				
 				if(this.orderFoodList.length === 0){
 					uni.showToast({
 					    title: '你还没有点菜',
@@ -294,7 +302,7 @@
 					let canzhuo_food = {
 						id:this.$Tool.uuid(),
 						canzhuoid,
-						foodid:orderfood.food.id,
+						foodid:orderfood.id,
 						count:orderfood.count,
 						isfinish:0,
 						userid,
@@ -316,7 +324,7 @@
 						duration: 1000
 					});
 				
-					this.cartFoodListShow = false;
+					//this.cartFoodListShow = false;
 					//计算最后结算金额
 					await canZhuoApi.computedFinalChargeById(canzhuo.id);
 					//清楚菜数量
@@ -330,14 +338,69 @@
 				}
 				
 			},
-			foodcountchange(food){
-				//console.log(1,food.count);
-				this.setFoodCount(food.count,food);
-				//this.computedFoodTypeCount(food);
+			//购物车引起变化
+			Orderfoodcountchange(orderFood){
+				//console.log(orderFood);
+				let foodList =  this.currentFoodType.foodList;
+			/* 	for (var i = 0; i <foodList.length; i++) {
+					if(foodList[i].id === orderFood.id){
+						  foodList.splice(i,1,orderFood);
+						  console.log(1111)
+					}
+				} */
+				
+				this.foodtypeList.forEach(foodtype=>{
+					if(foodtype.foodList){
+						foodtype.foodList.forEach(food=>{
+							 if(orderFood.id == food.id){
+								 food.count = orderFood.count;
+								 //console.log(food.count)
+							 }
+						 })
+					}
+					
+				})
+				
+				 this.orderFoodList.forEach(food=>{
+				 	 if(orderFood.id == food.id){
+				 		 food.count = orderFood.count;
+				 		 //console.log(food.count)
+				 	 }
+				  })
+				//console.log(this.currentFoodType);
+				//console.log(this.orderFoodList);
+				this.clearOrderFood0();
 				this.computedFoodTypeCountAll();
 			},
-			computedFoodTypeCount(food){
+			//菜单引起变化
+			foodcountchange(food){
+				
+				let orderFoodList = this.orderFoodList;
+				//console.log(1,food);
+				//设置菜的数量
+				let have = false;
+				for (var i = 0; i < orderFoodList.length; i++) {
+					if(orderFoodList[i].id === food.id){
+						  orderFoodList[i].count =  food.count;
+						  have = true;
+					}
+				}
+				this.currentFoodType.foodList.forEach(item=>{
+					if(item.id === food.id){
+						 item.count =  food.count;
+					}
+				})
+				if(!have){
+					orderFoodList.push(this.$Tool.copy(food));
+				}
+				this.clearOrderFood0();
+				this.computedFoodTypeCountAll();
+				//console.log(2,orderFoodList);
+				//console.log(3,this.currentFoodType.foodList);
+				
+			},
 			//计算当前类型总共点了多少餐
+			computedFoodTypeCount(food){
 				for(let type of this.foodtypeList){
 					if(type.id === food.foodtypeid){
 						let foodcountsum = 0;
@@ -352,8 +415,8 @@
 				}
 
 			},
-			computedFoodTypeCountAll(){
 			//计算当前类型总共点了多少餐
+			computedFoodTypeCountAll(){
 				for(let type of this.foodtypeList){
 					let foodcountsum = 0;
 					if(type.foodList){
@@ -367,34 +430,15 @@
 					
 				}
 			},
-			//点菜
-			setFoodCount(foodcount,food){
+			//清除不要的菜
+			clearOrderFood0(){
 				let orderFoodList = this.orderFoodList;
-				//设置菜的数量
-				let have = false;
-				for (var i = 0; i < orderFoodList.length; i++) {
-					if(orderFoodList[i].food.id === food.id){
-						  orderFoodList[i].count =  foodcount;
-						  food.count=  orderFoodList[i].count;
-						  have = true;
-					}
-				}
-				if(!have){
-					orderFoodList.push({food,count:1});
-				}
-				this.orderFoodCount = 0;
-				//console.log(foodcount);
-				//清除不要的菜
 				for (var i = 0; i < orderFoodList.length; i++) {
 					if(orderFoodList[i].count <= 0){
 						orderFoodList.splice(i,1);
 						
-					}else{
-						this.orderFoodCount += orderFoodList[i].count;
 					}
-					
 				}
-				
 			}
 			
 		}
@@ -405,6 +449,10 @@
 	.countset{
 		width: 200rpx;
 	}
+	.cart{
+		height: 100%;
+		background-color: #FFFFFF;
+	}
 	.xiala{
 		font-size: 50rpx;
 		color: #DD514C;
@@ -412,6 +460,9 @@
 	.cuIcon-delete{
 		font-size: 50rpx;
 		color: #F43F3B;
+	}
+	.foodlist{
+		height:calc(100% - 40rpx);
 	}
 	.shopMallcontent{
 		width: 100%;
@@ -424,17 +475,12 @@
 			width: 100%;
 			background-color: rgba($color: #7F7F7F, $alpha: 0.5);
 		}
+		
 		.cart-food-list {
-			position: absolute;
-			width: 100%;
-			bottom: 0px;
+			height: calc(100%);
 			background:#FFFFFF;
 			.foodlist{
-				min-height: 300rpx;
-				max-height: 700rpx;
-				/deep/ .uni-scroll-view{
-					max-height: 700rpx;
-				}
+				
 				.food{
 					padding: 20rpx;
 					width: 100%;
@@ -485,6 +531,8 @@
 			}
 		}
 		.fix-cart{
+			position: absolute;
+			bottom: 0;
 			display: flex;
 			color:#FFFFFF;
 			width: 100%;
@@ -509,7 +557,7 @@
 			margin:0 auto;
 			border-radius: 50%;
 			line-height: 50px;
-				z-index: 2;
+				z-index: 999;
 		}
 		.cart-part text{
 			position: relative;
@@ -567,12 +615,15 @@
 				background-color: #FFFFFF;
 			}
 		}
+		.left{
+			width: 200rpx;
+		}
 		.right{
 			
 			scroll-view{
 				width: 100%;
 			}
-			width: 530rpx;
+			width: 750rpx;
 			
 			.food{
 				background:#FFFFFF;

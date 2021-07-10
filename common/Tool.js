@@ -211,3 +211,10 @@ var uuid =  function  () {
      return  uuid;
 }
 exports.uuid = uuid;
+
+var copy = function(data) {
+	if (data) {
+		return JSON.parse(JSON.stringify(data));
+	}
+}
+exports.copy = copy;

@@ -1,7 +1,7 @@
 <template>
 	<view class="index">
-		<view class="item"><button type="primary" @click="gotoOrderRecords">历史订单</button> </view>
-		<view class="item"><button type="primary" @click="gotoAddress">外卖地址</button> </view>
+		<view class="item"><button type="primary" @click="gotoOrderRecords">历史记录</button> </view>
+	<!-- 	<view class="item"><button type="primary" @click="gotoAddress">外卖地址</button> </view> -->
 	</view>
 </template>
 

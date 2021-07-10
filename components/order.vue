@@ -20,8 +20,11 @@
 				<view class="row">
 					<image :src="item.baseimageurl" mode="aspectFill"></image>
 					<view class="rightrow">
-						<view class="sprow"><text>回锅肉</text><text >￥ {{item.price}}</text></view>
-						<view><text>x 1</text></view>
+						<view class="sprow"><text>{{item.label}}</text></view>
+						<view style="margin-top: 20rpx;">
+							<text style="margin-right: 20rpx;">x {{item.count}}</text>
+							<text >￥{{item.pricetotal}}</text>
+						</view>
 					</view>
 				</view>
 			</view>
@@ -94,6 +97,7 @@
 			.rightrow{
 				width: 450rpx;
 				margin-left: 30rpx;
+				
 			}
 			.sprow{
 				display: flex;

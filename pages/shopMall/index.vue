@@ -87,7 +87,7 @@
 			<view class="cart-count"  @click="openCartInfo" ><text > {{orderFoodList | allfoodCountSum}}份</text> </view>
 			<view class="cart-price">￥<span>{{orderFoodList | computedAmount}}</span></view>
 			<view class="cart-btn yellow" v-if="!cartFoodListShow" @click="cartFoodListShow = true">查看</view>
-			<view class="cart-btn red" v-else @click="ok">提交</view>
+			<view class="cart-btn red" v-else @click="ok">老板上菜</view>
 		</view>
 	</view>
 </template>

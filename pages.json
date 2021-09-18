@@ -65,7 +65,7 @@
 	            "pagePath" : "pages/checkOut/checkOut",
 	            "iconPath" : "static/images/icon_money.png",
 	            "selectedIconPath" : "static/images/icon_money.png",
-	            "text" : "菜单"
+	            "text" : "结算"
 	        },
 	        {
 	            "pagePath" : "pages/my/index",

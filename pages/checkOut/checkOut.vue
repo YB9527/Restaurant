@@ -36,14 +36,14 @@
 		
 		<view class="submit" v-if="orderFoodList.length > 0">
 			<view>
-				<text v-if="pricetotal !== orderFoodList[0].finalcharge">消费额:￥</text><text v-if="pricetotal !== orderFoodList[0].finalcharge" style="margin-right: 20rpx; color: #000000;text-decoration:line-through;"> {{pricetotal}} </text> 
-				<text>总额:</text>
+				<text v-if="pricetotal !== orderFoodList[0].finalcharge">消费金额:￥</text><text v-if="pricetotal !== orderFoodList[0].finalcharge" style="margin-right: 20rpx; color: #000000;text-decoration:line-through;"> {{pricetotal}} </text> 
+				<text>总金额:</text>
 			</view>
 			<view>
 				<text>￥</text>
 				<text class="monye"> {{orderFoodList[0].finalcharge}}</text> 
 			</view>
-			<view  class ="btn"><button type="primary" @click="settlement(orderFoodList)"> 离桌</button> </view>
+			<view  class ="btn"><button type="primary" @click="settlement(orderFoodList)"> 付钱</button> </view>
 		</view>
 	</view>
 </template>
@@ -125,7 +125,7 @@
 			//结算账单
 			 settlement(orderFoodList){
 				uni.showLoading({
-					title: '离桌中...',
+					title: '付钱中...',
 					mask: false
 				});
 				//支付成功
